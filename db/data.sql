@@ -1,5 +1,7 @@
 WITH rentals AS (
     select tm.*,
+        extract(epoch from tm.available) as available_epoch,
+        extract(epoch from tm.listed) as listed_epoch,
         ROUND(AVG(direct_solar_mean),0) AS avg_sunlight_kwh
     from trademe tm 
     left join wgtn_addresses addr on (
