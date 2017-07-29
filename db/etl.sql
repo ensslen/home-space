@@ -23,4 +23,5 @@ CREATE TABLE trademe (
 
 \copy trademe (listing_id, listed, available, unit, house, street, suburb, city, price, bedrooms, bathrooms, href, photo) from ../trademe/trademe-sample-data.csv with csv header
 
+
 COMMIT;
