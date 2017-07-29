@@ -23,36 +23,54 @@ def extract_json(html):
     data = json.loads(m.group(1))
     return data
 
-def extract_addresses(html):
+
+def parse_price(price_text):
+    m = re.match(r'^\$([0-9,]+) per week', price_text)
+    assert m is not None
+    return int(m.group(1).replace(',', ''))
+
+
+# TODO:  clean up this parser
+def parse_avail(avail_text):
+    m = re.search(r'Available (.+?)[\s]*$', avail_text)
+    if m is None:
+        print('parse_avail: cannot parse {!r}'.format(avail_text))
+    assert m is not None
+    return m.group(1)
+
+
+def parse_bedrooms(bedroom_text):
+    m = re.search(r'(\d+\+?)', bedroom_text)
+    assert m is not None
+    return m.group(1)
+
+
+def extract_listings(html):
+    listings = {}
     import lxml.html
     doc = lxml.html.fromstring(html)
-    links = doc.cssselect('a.dotted')
-    listings = {}
-    for link in links:
-        href = link.get('href')
-        listing_id = re.search(r'(?x) auction-(\d+) \. htm $', href).group(1)
-        address = link.text_content()
-        listings[listing_id] = {'href': href, 'address': address}
+    #data = extract_json(html)
+    for li in doc.cssselect('li.listingCard'):
+        link = li.cssselect('a.dotted')[0]
+        listing_id = re.search(r'(?x) auction-(\d+) \. htm $', link.get('href')).group(1)
+        subtitle = li.cssselect('div.property-card-subtitle')[0].text_content()
+        price = parse_price(li.cssselect('div.list-view-card-price')[0].text)
+        available = parse_avail(li.cssselect('span.list-view-card-available')[0].text)
+        bedrooms = parse_bedrooms(li.cssselect('div.property-card-bedrooms')[0].text_content())
+        listings[listing_id] = {
+            'listing_id':   listing_id,
+            'href':         'http://www.trademe.co.nz' + link.get('href'),
+            'address':      link.text_content(),
+            'suburb':       subtitle.split(',')[0].strip(),
+            'city':         subtitle.split(',')[1].strip(),
+            'price':        price,
+            'available':    available,
+            'bedrooms':     bedrooms,
+        }
     return listings
 
 
 if __name__ == '__main__':
     html = open('wgtn-flats.html').read()
-    listings = extract_addresses(html)
-    listing_data = extract_json(html)
-    for listing_id, data in listing_data['MarkerInfoViewModels'].items():
-        assert listing_id in listings
-        suburb, town = data['LocationDetails'].split(',')
-        listings[listing_id].update(
-            bedrooms=data['NumberOfBedrooms'],
-            bathrooms=data['NumberOfBathrooms'],
-            suburb=data['LocationDetails'],
-            available=data['Availability'],         # TODO parse
-            price=data['PropertyPrice'],            # TODO parse
-        )
-
+    listings = extract_listings(html)
     pprint.pprint(listings)
-
-    #print('data keys:\n', data['MarkerInfoViewModels'].keys())
-    #pprint.pprint(data['MarkerInfoViewModels'].popitem())
-
