@@ -17,6 +17,8 @@ SELECT objectid		AS building_id,
 FROM building_solar_radiation
 ;
 
+CREATE INDEX wgtn_sunlight_idx ON wgtn_sunlight USING GIST (building_poly);
+
 
 -- Partition the Wellington parcels
 CREATE TABLE wgtn_parcels AS
@@ -29,6 +31,8 @@ FROM nz_land_parcels
 WHERE land_distr='Wellington'
 ;
 
+CREATE INDEX wgtn_parcels_idx ON wgtn_parcels USING GIST (parcel_poly);
+
 
 -- Partition the Wellington addresses
 CREATE TABLE wgtn_addresses AS
@@ -40,6 +44,9 @@ SELECT UPPER(substring(full_addre from '([^/]*)/.*'))       AS unit,
 FROM nz_street_address
 WHERE town_city='Wellington'
 ;
+
+CREATE INDEX wgtn_addresses_idx ON wgtn_addresses USING GIST (address_point);
+CREATE INDEX wgtn_addresses_street ON wgtn_addresses (suburb, street, house, unit);
 
 
 COMMIT;
