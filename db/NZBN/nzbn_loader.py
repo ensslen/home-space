@@ -3,6 +3,16 @@ import os
 from config import config
 
 
+def executeSQL(conn, sql):
+    print sql
+    # create a cursor
+    cur = conn.cursor()
+    # execute a statement
+    cur.execute(sql)
+    # close the communication with the PostgreSQL
+    cur.close()
+
+
 def connect():
     """ Connect to the PostgreSQL database server """
     conn = None
@@ -25,7 +35,7 @@ def connect():
         db_version = cur.fetchone()
         print(db_version)
 
-        readonefile( '/Users/steven/Downloads/nzbn-bulk/companyaaana', cur)
+        readfiles(conn)
 
         # close the communication with the PostgreSQL
         cur.close()
@@ -43,16 +53,16 @@ def getElement(startPattern, data, endPattern):
     return data[start:end]
 
 
-def processDirector(cid, cur, data):
+def processDirector(cid, conn, data):
     firstName  = getElement(r'FirstName">', data, '<')
     MiddleName = getElement(r'MiddleName">', data, '<')
     LastName   = getElement(r'LastName">', data, '<')
 
     insertDirector = "INSERT INTO nzbn_director values (%s,'%s','%s','%s')" % (cid, firstName, MiddleName, LastName)
-    print insertDirector
+    executeSQL(conn, insertDirector)
 
 
-def getDelimitedSections(cid, cur, str, delimiter):
+def getDelimitedSections(cid, conn, str, delimiter):
     remaining = len(str)
     if 0 == remaining:
         return None
@@ -62,32 +72,33 @@ def getDelimitedSections(cid, cur, str, delimiter):
         return None
     start += + dlength
     end = str.find(delimiter, start)
-    processDirector(cid, cur, str[start:end])
+    processDirector(cid, conn, str[start:end])
     end += dlength
-    getDelimitedSections(cid, cur, str[end:],delimiter)
+    getDelimitedSections(cid, conn, str[end:],delimiter)
 
-def getCompany(xmldata, cur):
+def getCompany(xmldata, conn):
     cid = getElement(r'PartyID="',xmldata,'"')
     name = getElement(r'N2:ElementType="FullName">',xmldata,'<')
-    insertCompany = "INSERT INTO nzbn_company values (%s,'%s')" % (cid, name)
-    print insertCompany
+    insertCompany = "INSERT INTO nzbn_business values (%s,'%s')" % (cid, name)
+    executeSQL(conn, insertCompany)
     return cid
 
-def getDirectors(xmldata, cid, cur):
-    getDelimitedSections(cid, cur, xmldata,'N1:Director')
+def getDirectors(xmldata, cid, conn):
+    getDelimitedSections(cid, conn, xmldata,'N1:Director')
 
-def readonefile(f, cur):
-    #xmldoc = minidom.parse('/Users/steven/Downloads/nzbn-bulk/companyaaana')
-    with open(f, 'r') as myfile:
+def readonefile(f, conn):
+    fpath = "/Users/steven/Downloads/nzbn-bulk/%s" % f
+    with open(fpath, 'r') as myfile:
         xmldata = myfile.read().replace('\n', '')
-        cid = getCompany(xmldata, cur)
-        getDirectors(xmldata, cid, cur)
+        cid = getCompany(xmldata, conn)
+        getDirectors(xmldata, cid, conn)
+        executeSQL(conn,"COMMIT")
 
-def readfiles():
+def readfiles(conn):
     indir = '/Users/steven/Downloads/nzbn-bulk'
     for root, dirs, filenames in os.walk(indir):
         for f in filenames:
-            readonefile(f)
+            readonefile(f, conn)
 
 if __name__ == '__main__':
     connect()
