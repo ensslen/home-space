@@ -2,3 +2,5 @@
 .*.swp
 geo/data
 geo/sql
+db/data.json
+db/data.html
