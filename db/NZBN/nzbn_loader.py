@@ -1,7 +1,6 @@
 import psycopg2
 import os
-from govhack.config import config
-from xml.etree import ElementTree
+from config import config
 import re
 
 
@@ -36,10 +35,22 @@ def connect():
             conn.close()
             print('Database connection closed.')
 
+def getElement(pattern, data):
+    start = data.find(pattern)
+    start += len(pattern)
+    end = data.find(r'<', start)
+    return data[start:end]
+
+
 def processDirector(data):
-    print data
-    firstName = re.match(r'N2:ElementType="FirstName">(.+?)\<\/N',data)
-    print firstName.group()
+    firstName  = getElement(r'FirstName">', data)
+    MiddleName = getElement(r'MiddleName">', data)
+    LastName   = getElement(r'LastName">', data)
+
+    print firstName
+    print MiddleName
+    print LastName
+
 
 def getDelimitedSections(str, delimiter):
     remaining = len(str)
@@ -61,7 +72,7 @@ def getDirectors(xmldata):
 def readonefile(f):
     #xmldoc = minidom.parse('/Users/steven/Downloads/nzbn-bulk/companyaaana')
     with open(f, 'r') as myfile:
-        xmldata = '<root>' + myfile.read().replace('\n', '') + '</root>'
+        xmldata = myfile.read().replace('\n', '')
         getDirectors(xmldata)
 
 def readfiles():
