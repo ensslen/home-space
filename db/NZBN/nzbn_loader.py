@@ -1,7 +1,6 @@
 import psycopg2
 import os
 from config import config
-import re
 
 
 def connect():
@@ -26,6 +25,8 @@ def connect():
         db_version = cur.fetchone()
         print(db_version)
 
+        readonefile( '/Users/steven/Downloads/nzbn-bulk/companyaaana', cur)
+
         # close the communication with the PostgreSQL
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
@@ -35,24 +36,23 @@ def connect():
             conn.close()
             print('Database connection closed.')
 
-def getElement(pattern, data):
-    start = data.find(pattern)
-    start += len(pattern)
-    end = data.find(r'<', start)
+def getElement(startPattern, data, endPattern):
+    start = data.find(startPattern)
+    start += len(startPattern)
+    end = data.find(endPattern, start)
     return data[start:end]
 
 
-def processDirector(data):
-    firstName  = getElement(r'FirstName">', data)
-    MiddleName = getElement(r'MiddleName">', data)
-    LastName   = getElement(r'LastName">', data)
+def processDirector(cid, cur, data):
+    firstName  = getElement(r'FirstName">', data, '<')
+    MiddleName = getElement(r'MiddleName">', data, '<')
+    LastName   = getElement(r'LastName">', data, '<')
 
-    print firstName
-    print MiddleName
-    print LastName
+    insertDirector = "INSERT INTO nzbn_director values (%s,'%s','%s','%s')" % (cid, firstName, MiddleName, LastName)
+    print insertDirector
 
 
-def getDelimitedSections(str, delimiter):
+def getDelimitedSections(cid, cur, str, delimiter):
     remaining = len(str)
     if 0 == remaining:
         return None
@@ -62,18 +62,26 @@ def getDelimitedSections(str, delimiter):
         return None
     start += + dlength
     end = str.find(delimiter, start)
-    processDirector( str[start:end])
+    processDirector(cid, cur, str[start:end])
     end += dlength
-    getDelimitedSections(str[end:],delimiter)
+    getDelimitedSections(cid, cur, str[end:],delimiter)
 
-def getDirectors(xmldata):
-    getDelimitedSections(xmldata,'N1:Director')
+def getCompany(xmldata, cur):
+    cid = getElement(r'PartyID="',xmldata,'"')
+    name = getElement(r'N2:ElementType="FullName">',xmldata,'<')
+    insertCompany = "INSERT INTO nzbn_company values (%s,'%s')" % (cid, name)
+    print insertCompany
+    return cid
 
-def readonefile(f):
+def getDirectors(xmldata, cid, cur):
+    getDelimitedSections(cid, cur, xmldata,'N1:Director')
+
+def readonefile(f, cur):
     #xmldoc = minidom.parse('/Users/steven/Downloads/nzbn-bulk/companyaaana')
     with open(f, 'r') as myfile:
         xmldata = myfile.read().replace('\n', '')
-        getDirectors(xmldata)
+        cid = getCompany(xmldata, cur)
+        getDirectors(xmldata, cid, cur)
 
 def readfiles():
     indir = '/Users/steven/Downloads/nzbn-bulk'
@@ -82,4 +90,4 @@ def readfiles():
             readonefile(f)
 
 if __name__ == '__main__':
-    readonefile('/Users/steven/Downloads/nzbn-bulk/companyaaana')
+    connect()
