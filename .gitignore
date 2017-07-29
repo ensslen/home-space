@@ -1,3 +1,4 @@
 # ignore vim swapfiles
 .*.swp
 geo/data
+geo/sql
