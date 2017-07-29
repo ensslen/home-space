@@ -6,6 +6,7 @@ CREATE TABLE trademe_addr (
     listing_id INTEGER NOT NULL,
     address_id INTEGER NOT NULL REFERENCES wgtn_addresses
 );
+ALTER TABLE trademe_addr OWNER TO govhack_user;
 
 
 DROP FUNCTION IF EXISTS geomatch(TRADEME, WGTN_ADDRESSES);

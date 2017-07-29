@@ -1,0 +1,31 @@
+
+SETUP DATABASE
+
+    Note:  replace <conn> with your Postgres connection string.
+
+    Run these scripts:
+
+        $ psql <conn> -f makedb.sql
+        $ psql <conn> -f makeuser.sql      # once for each DB user you need
+
+
+LOAD DATA
+
+    Load the geo and trademe data:
+
+        $ psql <conn> -f load_geo.sql
+        $ psql <conn> -f load_trademe.sql
+
+    Geocode the trademe listings:
+
+        $ psql <conn> -f geocode.sql
+
+
+GENERATE THE OUTPUT
+
+    Export data as JSON:
+
+        $ sh export_json.sh         # writes to data.json
+        $ python gentable.py        # writes to data.html
+
+
