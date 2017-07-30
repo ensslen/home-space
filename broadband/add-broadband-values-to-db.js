@@ -35,8 +35,8 @@ const maxSpeed = house => getSpeed(house).reduce(R.max)
 const flattenParse = vals =>
   vals.map(house => ({
     address_id: house.addr_id,
-    technology: house.resp.results.map(R.prop('technology')),
-    providers: house.resp.results.map(res => res.providers.map(R.prop('name'))),
+    technology: "{" + house.resp.results.map(R.prop('technology')) + "}",
+    providers: "{" + house.resp.results.map(res => res.providers.map(R.prop('name'))) + "}",
     top_speed: maxSpeed(house.resp)
   }))
 
