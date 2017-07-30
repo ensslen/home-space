@@ -36,10 +36,16 @@ data AS (
         'sunlight',     json_build_object(
             'direct_kwh',           sunlight.direct_solar_mean,
             'total_kwh',            sunlight.total_solar_mean
+        ),
+        'broadband',    json_build_object(
+            'max_speed',            nz_broadband.top_speed,
+            'technologies',         nz_broadband.technologies
         )
     ) AS obj
     FROM trademe
     LEFT JOIN sunlight USING (listing_id)
+    LEFT JOIN trademe_addr USING (listing_id)
+    LEFT JOIN nz_broadband USING (address_id)
     ORDER BY listed DESC
 )
 
