@@ -20,7 +20,7 @@ import json
 
 def myGet(d, selector):
     if selector in d:
-        return json.dumps(d[selector]).replace('"', '')
+        return json.dumps(d[selector]).replace('"', '').replace('[','').replace(']','')
     else:
         return ''
 
