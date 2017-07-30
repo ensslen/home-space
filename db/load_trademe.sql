@@ -1,7 +1,7 @@
 BEGIN;
 
 
-DROP TABLE IF EXISTS trademe;
+DROP TABLE IF EXISTS trademe CASCADE;
 
 
 CREATE TABLE trademe (
@@ -29,7 +29,7 @@ CREATE TABLE trademe (
 ALTER TABLE trademe OWNER TO govhack_user;
 
 
-\copy trademe (listing_id, listed, available, unit, house, street, suburb, city, price, bedrooms, bathrooms, href, photo) from ../trademe/trademe-sample-data.csv with csv header
+\copy trademe (listing_id, listed, available, unit, house, street, suburb, city, price, bedrooms, bathrooms, href, photo) from ../trademe/listings.csv with csv header
 
 
 COMMIT;

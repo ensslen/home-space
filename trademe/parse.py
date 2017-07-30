@@ -76,13 +76,14 @@ def parse_listing_id(elem):
 # and this is a hideous hack but it works on 90% of the listings!
 def parse_address(elem):
     address_text = elem.cssselect('a.dotted')[0].text_content().upper()
+    address_parts = [re.sub(r'[^A-Z0-9/]', ' ', part) for part in address_text.split()]
+    address_text = ' '.join(address_parts) 
     m = re.search('''(?x)
         ^
-        (?:(?:UNIT|APT|APARTMENT)\s)?                     # strip off some common prefixes
-        (?:([0-9A-Z]+)/)?                                   # optional flat number
-        (\d+(?:-\d+)?[A-Z]*)                                  # house number(s)
+        (?: ([^/]+) / \s*)?                                     # optional flat/unit description
+        (\d+(?:-\d+)?[A-Z]*)                                    # house number(s)
         \s+
-        ([^.,]+)                                            # street name
+        ([^.,]+)                                                # street name
     ''', address_text)
     if not m:
         raise ParseError('Cannot parse address: {!r}'.format(address_text))
