@@ -1,9 +1,9 @@
-from configparser import ConfigParser
+from configparser import SafeConfigParser
 
 
-def config(filename='database.ini', section='postgresql'):
+def config(filename='/Users/steven/PycharmProjects/home-space/db/NZBN/db.ini', section='postgresql'):
     # create a parser
-    parser = ConfigParser()
+    parser = SafeConfigParser()
     # read config file
     parser.read(filename)
 
