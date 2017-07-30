@@ -3,26 +3,15 @@
 import json
 import pprint
 import re
+import requests
 import sys
 import time
 
 
-import lxml.etree
+import lxml.html
 
 
-def etree_parse(html):
-    parser = lxml.etree.HTMLParser()
-    tree = lxml.etree.parse(StringIO(html), parser)
-    return tree
-
-
-
-
-def extract_json(html):
-    m = re.search(r'(?x) MapBasedSearch \. initialiseMbs \( ( { .* ) \) ;', html)
-    assert m
-    data = json.loads(m.group(1))
-    return data
+class ParseError(Exception): pass
 
 
 def parse_price(price_text):
@@ -46,12 +35,16 @@ def parse_listing_date(elem):
 
 def parse_date(d_text):
     # Convert d_text to 'struct tm'
-    if d_text == 'Now':
+    d_text = d_text.upper()
+    if d_text.startswith('NOW') or d_text.startswith('TODAY'):
         d = time.localtime()
-    elif d_text == 'Yesterday':
+    elif d_text.startswith('YESTERDAY'):
         d = time.localtime(time.time() - 86400)
     else:
-        d = time.strptime(d_text.replace(',', ''), '%a %d %b')
+        try:
+            d = time.strptime(d_text.replace(',', ''), '%a %d %b')
+        except ValueError:
+            return None
     # Parsing strategy:  use current year, if parsed date is 'really old'
     # (more than 180 days ago) then increment year by 1 (the date's in the future).
     year = time.localtime().tm_year
@@ -79,9 +72,6 @@ def parse_listing_id(elem):
     return listing_id
 
 
-class ParseError(Exception): pass
-
-
 # returns (flat?, house, street)
 # and this is a hideous hack but it works on 90% of the listings!
 def parse_address(elem):
@@ -102,11 +92,8 @@ def parse_address(elem):
     return flat, house, street
 
 
-def extract_listings(html):
+def parse_listings(doc):
     listings = {}
-    import lxml.html
-    doc = lxml.html.fromstring(html)
-    #data = extract_json(html)
     for li in doc.cssselect('li.listingCard'):
         try:
             link = li.cssselect('a.dotted')[0]
@@ -139,6 +126,33 @@ def extract_listings(html):
     return listings
 
 
+def fetch_pages():
+    url = 'http://www.trademe.co.nz/browse/categoryattributesearchresults.aspx'
+    params = {
+        'sort_order':   'expiry_desc',
+        '134':          '15',
+        '135':          '47',
+        '132':          'FLAT',
+        'search':       '1',
+        'sidebar':      '1',
+        'cid':          '5748',
+        'v':            'List',
+    }
+    pages = []
+    params['page'] = 1
+    while True:
+        print('Fetching listings, page #{:d}...'.format(params['page']), file=sys.stderr)
+        resp = requests.get(url, params)
+        doc = lxml.html.fromstring(resp.text)
+        pages.append(doc)
+        # if there's a 'Next >>' link, keep fetching
+        links = doc.cssselect('a[rel=next]')
+        if not any(link.text_content() == 'Next >>' for link in links):
+            break
+        params['page'] += 1
+    return pages
+        
+
 def to_csv(value):
     if value is None:
         return ''
@@ -164,8 +178,10 @@ def dump_csv(records, f):
 
 
 if __name__ == '__main__':
-    import sys
-    html = open(sys.argv[1]).read()
-    listings = extract_listings(html)
-    with open('output.csv', 'w') as f:
-        dump_csv(listings, sys.stdout)
+    output = sys.argv[1]
+    pages = fetch_pages()
+    listings = {}
+    for page in pages:
+        listings.update(parse_listings(page))
+    with open(output, 'w') as f:
+        dump_csv(listings, f)
