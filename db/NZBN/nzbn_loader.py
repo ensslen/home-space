@@ -50,7 +50,7 @@ def getElement(startPattern, data, endPattern):
     start = data.find(startPattern)
     start += len(startPattern)
     end = data.find(endPattern, start)
-    return data[start:end]
+    return data[start:end].replace("'","''")
 
 
 def processDirector(cid, conn, data):
@@ -87,6 +87,7 @@ def getDirectors(xmldata, cid, conn):
     getDelimitedSections(cid, conn, xmldata,'N1:Director')
 
 def readonefile(f, conn):
+    print f
     fpath = "/Users/steven/Downloads/nzbn-bulk/%s" % f
     with open(fpath, 'r') as myfile:
         xmldata = myfile.read().replace('\n', '')
