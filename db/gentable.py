@@ -38,6 +38,7 @@ def gen():
         /*table#flats { font-family: 'Open Sans Condensed'; font-size: 0.9em; margin-top: 5em; } */
         .dataTables_wrapper { font-family: 'Open Sans Condensed'; font-size: 0.9em; }
         table#flats { margin-top: 5em; }
+        table#flats img { width: 160px; min-height: 120px; max-height: 120px; }
         table#flats a { font-weight: bold; color: #666; }
         table#flats td { white-space: nowrap; vertical-align: top; }
         table#flats th { white-space: nowrap; }
