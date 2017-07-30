@@ -1,0 +1,5 @@
+address_id,technologies[],providers[],top_speed
+1,"{Fibre,Wireless,ADSL}","{Chorus,Spark}",1000
+2,"{Fibre,Wireless,ADSL}","{Chorus,Spark}",1000
+3,"{Fibre,Cable,VDSL,Wireless,ADSL}","{Chorus,Vodafone,Spark}",1000
+4,"{Cable,VDSL,Wireless,ADSL}","{Vodafone,Chorus,Spark}",100
