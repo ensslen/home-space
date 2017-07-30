@@ -16,8 +16,8 @@ def row(flat):
         flat['sunlight']['total_kwh'] = 0
     return '''
     <tr>
-        <td><img src="{flat[trademe][thumbnail]}"></td>
-        <td>{flat[address_text]}</td>
+        <td><a href="{flat[trademe][link]}" class="thumb"><img src="{flat[trademe][thumbnail]}"></a></td>
+        <td><a href="{flat[trademe][link]}">{flat[address_text]}</a></td>
         <td>{flat[address][suburb]}</td>
         <td>{flat[trademe][bedrooms]}</td>
         <td>{flat[trademe][bathrooms]}</td>
@@ -31,7 +31,10 @@ def row(flat):
 
 def gen():
     data = json.load(open('data.json'))
-    style = 'body { width: 960px; margin: 0 auto; }'
+    style = '''
+        body { width: 960px; margin: 0 auto; }
+        table#flats { }
+    '''
     tbody = '\n'.join(row(flat) for flat in data)
     return '''
         <!DOCTYPE html>
@@ -47,15 +50,21 @@ def gen():
             <h1>WELLY.SPACE</h1>
             <table id="flats">
               <thead>
-                <th>Photo</th>
-                <th>Address</th>
-                <th>Suburb</th>
-                <th>Bedrooms</th>
-                <th>Bathrooms</th>
-                <th>Rent</th>
-                <th>Available</th>
-                <th>Direct sun</th>
-                <th>Total sun</th>
+                <tr>
+                    <th colspan=7>Flat info</th>
+                    <th colspan=2>Sunlight</th>
+                </tr>
+                <tr class="sort-header" data-sort-method="thead">
+                    <th>Photo</th>
+                    <th>Address</th>
+                    <th>Suburb</th>
+                    <th>Bedrooms</th>
+                    <th>Bathrooms</th>
+                    <th>Rent</th>
+                    <th>Available</th>
+                    <th>Direct</th>
+                    <th data-sort-default>Total</th>
+                </tr>
               </thead>
               <tbody>
                 {tbody}
