@@ -64,9 +64,9 @@ $$;
 INSERT INTO trademe_tenancy (listing_id, tenancy_id)
 WITH matches AS (
     -- Join to addresses using street name, then score each candidate
-    SELECT listing_id, applicationNumber, geomatch_tenancy_score(tm, t) AS score,
+    SELECT listing_id, id, geomatch_tenancy_score(tm, t) AS score,
            row_number() OVER (PARTITION BY listing_id ORDER BY geomatch_tenancy_score(tm, t) DESC) AS ranking
-    FROM trademe tm
+    FROM trademe tm 
     JOIN tenancy t
     ON (canonical_street(tm.street) = t.tenancystreetname AND
         house_digits(tm.house) = house_digits(t.tenancystreetnumber))
