@@ -25,7 +25,7 @@ def myGet(d, selector):
         return ''
 
 def handleDecision(d):
-    return '"%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s"\n' % (
+    return '"%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s"\n' % (
         myGet(d, 'id'),
         myGet(d, 'applicationId_s'),
         myGet(d, 'applicationNumber_s'),
@@ -47,8 +47,8 @@ def handleDecision(d):
         myGet(d, 'tenancyStreetName_s'),
         myGet(d, 'tenancyStreetNumber_s'),
         myGet(d, 'tenancyStreetType_s'),
-        myGet(d, 'tenancySuburb_s'))
-
+        myGet(d, 'tenancySuburb_s'),
+        myGet(d, 'tenancyUnitIdentifier_s'))
 
 def handleDecisions(arr, f):
     for d in arr:
