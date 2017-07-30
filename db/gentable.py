@@ -4,20 +4,27 @@ import json
 
 
 def row(flat):
-    address = flat['house'] + ' ' + flat['street']
-    if flat['unit']:
-        address = flat['unit'] + '/' + address
-    sunlight = 'Unknown' if not flat['avg_sunlight_kwh'] else '{:d} kwh/m2'.format(flat['avg_sunlight_kwh'])
+    direct_sun = 'Unknown'
+    if flat['sunlight']['direct_kwh']:
+        direct_sun = '{:d} kwh/m2'.format(flat['sunlight']['direct_kwh'])
+    else:
+        flat['sunlight']['direct_kwh'] = 0
+    total_sun = 'Unknown'
+    if flat['sunlight']['total_kwh']:
+        total_sun = '{:d} kwh/m2'.format(flat['sunlight']['total_kwh'])
+    else:
+        flat['sunlight']['total_kwh'] = 0
     return '''
     <tr>
-        <td><img src="{flat[photo]}"></td>
-        <td>{address}</td>
-        <td>{flat[suburb]}</td>
-        <td>{flat[bedrooms]}</td>
-        <td>{flat[bathrooms]}</td>
-        <td data-sort="{flat[price]}">${flat[price]:,d}</td>
-        <td data-sort="{flat[available_epoch]}">{flat[available]}</td>
-        <td data-sort="{flat[avg_sunlight_kwh]}">{sunlight}</td>
+        <td><img src="{flat[trademe][thumbnail]}"></td>
+        <td>{flat[address_text]}</td>
+        <td>{flat[address][suburb]}</td>
+        <td>{flat[trademe][bedrooms]}</td>
+        <td>{flat[trademe][bathrooms]}</td>
+        <td data-sort="{flat[trademe][rent]}">${flat[trademe][rent]:,d}/wk</td>
+        <td data-sort="{flat[trademe][available_epoch]}">{flat[trademe][available]}</td>
+        <td data-sort="{flat[sunlight][direct_kwh]}">{direct_sun}</td>
+        <td data-sort="{flat[sunlight][total_kwh]}">{total_sun}</td>
     </tr>
     '''.format(**locals())
 
@@ -32,6 +39,7 @@ def gen():
           <head>
             <title>WELLY.SPACE</title>
             <script src="https://cdn.rawgit.com/tristen/tablesort/v5.0.1/dist/tablesort.min.js"></script>
+            <script src="https://cdn.rawgit.com/tristen/tablesort/v5.0.1/dist/sorts/tablesort.number.min.js"></script>
             <link rel="stylesheet" href="https://cdn.rawgit.com/tristen/tablesort/v5.0.1/demo/style.css">
             <style>{style}</style>
           </head>
@@ -46,7 +54,8 @@ def gen():
                 <th>Bathrooms</th>
                 <th>Rent</th>
                 <th>Available</th>
-                <th>Sunshine</th>
+                <th>Direct sun</th>
+                <th>Total sun</th>
               </thead>
               <tbody>
                 {tbody}
