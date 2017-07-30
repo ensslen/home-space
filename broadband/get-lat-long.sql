@@ -1,7 +1,3 @@
-select ST_X(wgtn_addr.address_point), ST_Y(wgtn_addr.address_point), tr_addr.address_id from trademe tm
-    inner join trademe_addr tr_addr on (
-      tr_addr.listing_id = tm.listing_id
-    )
-    inner join wgtn_addresses wgtn_addr on (
-      wgtn_addr.address_id = tr_addr.address_id
-    );
+select ST_X(address_point), ST_Y(address_point), address_id from
+    ( select distinct address_id from trademe_addr) x
+    join wgtn_addresses using (address_id);
