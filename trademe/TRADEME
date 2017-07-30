@@ -3,3 +3,8 @@
 Search URL:
 
 http://www.trademe.co.nz/browse/categoryattributesearchresults.aspx?sort_order=expiry_desc&134=15&135=47&136=&153=&132=FLAT&59=0&59=0&122=0&122=0&29=&123=0&123=0&search=1&sidebar=1&cid=5748&rptpath=350-5748-&216=0&216=0&217=0&217=0&v=List
+
+This seems to be enough:
+
+http://www.trademe.co.nz/browse/categoryattributesearchresults.aspx?sort_order=expiry_desc&134=15&135=47&132=FLAT&search=1&sidebar=1&cid=5748&v=List
+
