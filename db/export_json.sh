@@ -1,3 +1,3 @@
 #!/bin/sh
 
-psql service=govhack -P 'format=unaligned' --tuples-only -f data.sql -o data.json
+psql service=govhack -P 'format=unaligned' --tuples-only -f export_json.sql -o data.json

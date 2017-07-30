@@ -24,14 +24,16 @@ def row(flat):
 
 def gen():
     data = json.load(open('data.json'))
+    style = 'body { width: 960px; margin: 0 auto; }'
     tbody = '\n'.join(row(flat) for flat in data)
-    print('''
+    return '''
         <!DOCTYPE html>
         <html>
           <head>
             <title>WELLY.SPACE</title>
-            <style></style>
             <script src="https://cdn.rawgit.com/tristen/tablesort/v5.0.1/dist/tablesort.min.js"></script>
+            <link rel="stylesheet" href="https://cdn.rawgit.com/tristen/tablesort/v5.0.1/demo/style.css">
+            <style>{style}</style>
           </head>
           <body>
             <h1>WELLY.SPACE</h1>
@@ -47,16 +49,17 @@ def gen():
                 <th>Sunshine</th>
               </thead>
               <tbody>
-                {}
+                {tbody}
               </tbody>
             </table>
             <script>
               new Tablesort(document.getElementById("flats"));
             </script>
           </body>
-        </html>'''.format(tbody))
+        </html>'''.format(style=style, tbody=tbody)
 
 
 
 if __name__ == '__main__':
-    gen()
+    with open('data.html', 'w') as f:
+        f.write(gen())

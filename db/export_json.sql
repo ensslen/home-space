@@ -4,11 +4,8 @@ WITH rentals AS (
         extract(epoch from tm.listed) as listed_epoch,
         ROUND(AVG(direct_solar_mean),0) AS avg_sunlight_kwh
     from trademe tm 
-    left join wgtn_addresses addr on (
-        (tm.unit IS NULL OR tm.unit = addr.unit)
-    AND (tm.house = addr.house)
-    AND (tm.street = addr.street)
-    )
+    left join trademe_addr using (listing_id)
+    left join wgtn_addresses addr using (address_id)
     left join wgtn_parcels on (ST_Contains(parcel_poly, address_point))
     left join wgtn_sunlight on (ST_Contains(parcel_poly, building_poly))
     group by listing_id
